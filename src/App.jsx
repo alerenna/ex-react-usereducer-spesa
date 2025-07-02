@@ -13,18 +13,41 @@ function App() {
   const [addedProducts, setAddedProducts] = useState([])
 
   const addToCart = (product) => {
-    setAddedProducts(curr => {
-      const exists = curr.find(p => p.name === product.name);
-      if (exists) return curr;
+    const exists = addedProducts.find(p => p.name === product.name);
 
+    if (exists) {
+      updateProductQuantity(product);
+    } else {
       const productToAdd = {
         name: product.name,
         price: product.price,
         quantity: 1
       };
-      return [...curr, productToAdd];
-    });
+      setAddedProducts(curr => [...curr, productToAdd]);
+    }
+  };
+
+
+
+  const updateProductQuantity = product => {
+    setAddedProducts(curr =>
+      curr.map(p =>
+        p.name === product.name
+          ? { ...p, quantity: p.quantity + 1 }
+          : p
+      )
+    )
   }
+
+  const removeFromCart = (i) => {
+    setAddedProducts(curr => curr.filter((p, index) => {
+      return index !== i
+    }))
+  }
+
+  const total = addedProducts.reduce((acc, product) => {
+    return acc + product.price * product.quantity
+  }, 0)
 
   return (
     <>
@@ -32,7 +55,7 @@ function App() {
       <ul>
         {products.map((product, i) => (
           <li key={i}>
-            <p>Prodotto: {product.name} Prezzo: {product.price}€</p>
+            <p>Prodotto: {product.name} Prezzo unitario: {product.price}€</p>
             <button onClick={() => addToCart(product)}>Aggiungi al carrello</button>
           </li>
         ))}
@@ -40,18 +63,25 @@ function App() {
 
 
       {addedProducts.length > 0 && (
-        <div>
-          <h2>Carrello</h2>
-          <ul>
-            {addedProducts.map((product, i) => (
-              <li key={i}>
-                <p>Prodotto: {product.name} Prezzo: {product.price}€ Quantità: {product.quantity}</p>
-              </li>
+        <>
 
-            ))}
-          </ul>
-        </div>
+          <div>
+            <h2>Carrello</h2>
+            <ul>
+              {addedProducts.map((product, i) => (
+                <li key={i}>
+                  <p>Prodotto: {product.name} Quantità: {product.quantity} Prezzo unitario: {product.price}€ </p>
+                  <button onClick={() => removeFromCart(i)}>Rimuovi dal carrello</button>
+                </li>
+
+              ))}
+            </ul>
+          </div>
+
+          <p> Totale carrello: {total.toFixed(2)} </p>
+        </>
       )}
+
 
     </>
 
